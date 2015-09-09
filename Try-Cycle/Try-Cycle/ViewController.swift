@@ -1,19 +1,33 @@
-//
-//  ViewController.swift
-//  Try-Cycle
-//
-//  Created by Catherine Reyto on 2015-09-09.
-//  Copyright (c) 2015 Catherine Reyto. All rights reserved.
-//
 
 import UIKit
+import MapKit 
 
 
-class ViewController: UIViewController {
-
+class ViewController: UIViewController, CLLocationManagerDelegate, MKMapViewDelegate {
+    
+    
+    @IBOutlet var mapView: MKMapView!
+    
+    let locationManager = CLLocationManager()
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        // request a user's authorization for location services:
+        
+
+        locationManager.requestWhenInUseAuthorization()
+        let status = CLLocationManager.authorizationStatus()
+        if status == CLAuthorizationStatus.AuthorizedWhenInUse {
+            self.mapView.showsUserLocation = true
+
+        
+        self.locationManager.delegate = self
+        self.mapView.delegate = self
+        self.locationManager.startUpdatingLocation()
+        self.locationManager.requestWhenInUseAuthorization()
+        
+  
         
         // Adding external web-service URL to the application as an NSURL object:
         var endpoint = NSURL(string: "http://www.bikesharetoronto.com/stations/json")
@@ -29,6 +43,10 @@ class ViewController: UIViewController {
         if let json = NSJSONSerialization.JSONObjectWithData(data!, options: NSJSONReadingOptions.MutableContainers, error: nil) as? NSDictionary {
             
             var station = Station(json: json)
+            
+            for pins in station.mapPins {
+                mapView.addAnnotation(pins as? MapPin)
+            }
             
             // will return readable data that can be used to start plotting map.
             print(json)
@@ -48,11 +66,11 @@ class ViewController: UIViewController {
                 }
             }
         }
-    }
+        }
+    
 
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
+
+
     }
 
 
